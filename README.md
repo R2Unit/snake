@@ -2,7 +2,7 @@
 A simple snake game programmed at rust. 
 
 ## How to run?
-Keep in mind that you must have (rust)[https://www.rust-lang.org/tools/install] on your device to run this. 
+Keep in mind that you must have [rust](https://www.rust-lang.org/tools/install) on your device to run this. 
 
 1) 
 Clone this repo
