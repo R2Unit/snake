@@ -1,7 +1,7 @@
 # Rusty Snake
 A simple snake game programmed at rust. 
 
-## How to run?
+## Run Rusty Snake
 Keep in mind that you must have [Rust](https://www.rust-lang.org/tools/install) on your device to run this. 
 
 ### tep 1
