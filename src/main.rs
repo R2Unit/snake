@@ -122,7 +122,6 @@ impl MainState {
         }
     }
 
-    /// AI for single-player mode.
     fn choose_move(&self) -> Option<Point> {
         let head = self.snake[0];
         let possible_moves = vec![
@@ -148,7 +147,6 @@ impl MainState {
         Some(safe_moves[0])
     }
 
-    /// AI for competitive mode: given a snake and a list of obstacles, choose a move toward food.
     fn choose_move_for_snake(snake: &Vec<Point>, obstacles: &Vec<Point>, food: Point) -> Option<Point> {
         let head = snake[0];
         let possible_moves = vec![
@@ -177,7 +175,6 @@ impl MainState {
         Some(safe_moves[0])
     }
 
-    /// Update single-player mode (manual or self‑play).
     fn update_single(&mut self) {
         let new_head = if self.auto_play {
             self.choose_move()
@@ -209,12 +206,10 @@ impl MainState {
         }
     }
 
-    /// Update competitive mode: update both the player's snake and the bot's snake.
     fn update_competitive(&mut self) {
         let mut player_dead = false;
         let mut bot_dead = false;
 
-        // --- Update player's snake ---
         if let Some(player_head) = self.player_snake.first().copied() {
             let new_head = Point { x: player_head.x + self.player_snake_dir.x, y: player_head.y + self.player_snake_dir.y };
             if new_head.x < 0 || new_head.x >= GRID_WIDTH || new_head.y < 0 || new_head.y >= GRID_HEIGHT {
@@ -254,7 +249,6 @@ impl MainState {
             }
         }
 
-        // --- Update bot's snake ---
         let obstacles: Vec<Point> = self.bot_snake
             .iter()
             .chain(self.player_snake.iter())
@@ -354,55 +348,44 @@ impl event::EventHandler for MainState {
                 graphics::draw(ctx, &menu_text, (dest_point, Color::WHITE))?;
             },
             AppState::Playing => {
-                // Draw food.
                 let food_rect = Rect::new(offset_x + self.food.x as f32 * cell_size, offset_y + self.food.y as f32 * cell_size, cell_size, cell_size);
                 let food_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), food_rect, Color::GREEN)?;
                 graphics::draw(ctx, &food_mesh, DrawParam::default())?;
-                // Draw block.
                 let block_rect = Rect::new(offset_x + self.block.x as f32 * cell_size, offset_y + self.block.y as f32 * cell_size, cell_size, cell_size);
                 let block_color = Color::new(1.0, 0.65, 0.0, 1.0);
                 let block_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), block_rect, block_color)?;
                 graphics::draw(ctx, &block_mesh, DrawParam::default())?;
-                // Draw single snake in white.
                 for segment in &self.snake {
                     let seg_rect = Rect::new(offset_x + segment.x as f32 * cell_size, offset_y + segment.y as f32 * cell_size, cell_size, cell_size);
                     let seg_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), seg_rect, Color::WHITE)?;
                     graphics::draw(ctx, &seg_mesh, DrawParam::default())?;
                 }
-                // Draw score.
                 let score_text = Text::new(format!("Score: {}", self.score));
                 graphics::draw(ctx, &score_text, (ggez::mint::Point2 { x: 5.0, y: 5.0 }, Color::BLUE))?;
             },
             AppState::Competitive => {
-                // Draw food.
                 let food_rect = Rect::new(offset_x + self.food.x as f32 * cell_size, offset_y + self.food.y as f32 * cell_size, cell_size, cell_size);
                 let food_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), food_rect, Color::GREEN)?;
                 graphics::draw(ctx, &food_mesh, DrawParam::default())?;
-                // Draw block.
                 let block_rect = Rect::new(offset_x + self.block.x as f32 * cell_size, offset_y + self.block.y as f32 * cell_size, cell_size, cell_size);
                 let block_color = Color::new(1.0, 0.65, 0.0, 1.0);
                 let block_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), block_rect, block_color)?;
                 graphics::draw(ctx, &block_mesh, DrawParam::default())?;
-                // Draw player's snake (in white).
                 for segment in &self.player_snake {
                     let seg_rect = Rect::new(offset_x + segment.x as f32 * cell_size, offset_y + segment.y as f32 * cell_size, cell_size, cell_size);
                     let seg_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), seg_rect, Color::WHITE)?;
                     graphics::draw(ctx, &seg_mesh, DrawParam::default())?;
                 }
-                // Draw bot's snake (in yellow).
                 for segment in &self.bot_snake {
                     let seg_rect = Rect::new(offset_x + segment.x as f32 * cell_size, offset_y + segment.y as f32 * cell_size, cell_size, cell_size);
                     let seg_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), seg_rect, Color::YELLOW)?;
                     graphics::draw(ctx, &seg_mesh, DrawParam::default())?;
                 }
-                // Draw scores.
                 let score_text = Text::new(format!("Player: {}   Bot: {}", self.player_score, self.bot_score));
                 graphics::draw(ctx, &score_text, (ggez::mint::Point2 { x: 5.0, y: 5.0 }, Color::BLUE))?;
             },
             AppState::GameOver => {
-                // In GameOver state, display a message based on the mode.
                 let game_over_text = if self.app_state == AppState::GameOver {
-                    // In competitive mode, decide the winner.
                     if self.player_snake.is_empty() && self.bot_snake.is_empty() {
                         Text::new("Game Over! It's a tie!\nPress Y to Play Again\nPress N to Quit\n\nPress F11 to toggle Full Screen")
                     } else if self.player_snake.is_empty() {
@@ -410,7 +393,6 @@ impl event::EventHandler for MainState {
                     } else if self.bot_snake.is_empty() {
                         Text::new("Game Over! You win!\nPress Y to Play Again\nPress N to Quit\n\nPress F11 to toggle Full Screen")
                     } else {
-                        // For single-player modes.
                         Text::new(format!("Game Over! Final Score: {}\nPress Y to Play Again\nPress N to Quit\n\nPress F11 to toggle Full Screen", self.score))
                     }
                 } else {
@@ -425,7 +407,6 @@ impl event::EventHandler for MainState {
     }
 
     fn key_down_event(&mut self, ctx: &mut Context, keycode: KeyCode, _keymod: KeyMods, _repeat: bool) {
-        // Toggle full screen on F11.
         if keycode == KeyCode::F11 {
             self.fullscreen = !self.fullscreen;
             let new_mode = if self.fullscreen {
@@ -484,7 +465,6 @@ impl event::EventHandler for MainState {
                 }
             },
             AppState::Competitive => {
-                // In competitive mode, update the player's snake direction.
                 match keycode {
                     KeyCode::Up => {
                         if self.player_snake_dir.y != 1 {
